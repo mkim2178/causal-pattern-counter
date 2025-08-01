@@ -1,118 +1,145 @@
 import networkx as nx
 import matplotlib.pyplot as plt
 import random
+import time
 
 
 
-"""
-A graph must have at least 3 nodes with 2 edges.
-"""
 
-def create_DAG(num_nodes, num_edges):
-    """
-    Create a directed acyclic graph (DAG) with specified number of nodes and edges.
+# --------------------------------------WORK IN PROGRESS--------------------------------------
+def find_colliders(test_DAG):
 
-    This function creates a DAG that satisfies following condtions:
-    - at least 4 nodes and 3 edges
-    - at most (number of nodes * number of nodes - 1) // 2 edges
-    - the DAG is guaranteed to be connected
+    colliders = nx.dag.colliders(test_DAG)
 
-    Parameters:
-        num_nodes (int): A number of DAG's nodes
-        num_edges (int): A number of DAG's edges
+    if list(colliders) == 0:
+        return []
     
-    Returns:
-        G (networkx.Digraph): A connected and directed acyclic graph that satisfies conditions from the long description
-    
-    Raise:
-        ValueError:
-            - if number of nodes is less than 4 or number of edges is less than 3
-            - if number of edges exceeds the 'maximum_edges'
-            - if number of edges is less than the number of nodes - 1
-    """
+    collider_graphs = []
 
-
-    if num_nodes < 4 or num_edges < 3:
-        raise ValueError("DAG has too few nodes or edges: minimum number of nodes: 4, minimum number of edges: 3")
-    
-
-    maximum_edges = (num_nodes * (num_nodes - 1)) // 2
-    if num_edges > maximum_edges:
-        raise ValueError("DAG has too many edges, which can create a cycle: reduce the number of edges")
-
-
-    if num_edges < num_nodes - 1:
-        raise ValueError("DAG can be disconnected: increase the number of edges")
-
-
-    G = nx.DiGraph()
-
-    # connect every node with num_nodes - 1 edges to guarantee a connected DAG
-    for i in range(1, num_nodes):
-        G.add_edge(i, i + 1)
-
-
-    while G.number_of_edges() < num_edges:
-
-        # get two random nodes and add it to the graph
-        u, v = random.sample(range(1, num_nodes + 1), 2)
-
-        # if there is no path where v -> u (checking a cycle) add the edge u -> v: this avoids the creation of a cycle
-        if not nx.has_path(G, v, u):
-            G.add_edge(u, v)
-    
-    return G
-
-
-def check_DAG(test_DAG):
-    """
-    Print out a string "IS DAG" if the graph is directed acyclic graph.
-
-    This function calls the networkx's 'is_directed_acyclic_graph' to check if the graph is a DAG (returns True if DAG, otherwise, False).
-
-    Parameters:
-        test_DAG (networkx.DiGraph): A directed graph that has been created from the function 'create_DAG'
-    """
-
-    if nx.is_directed_acyclic_graph(test_DAG):
-        print("IS DAG")
-    else:
-        print("NOT A DAG")
-
-
-"""
-create functions that finds the collider and draw the graph (codes already in the main())
-"""
-
-
-def main():
-    DAG = create_DAG(6, 7)
-
-    check_DAG(DAG)
-
-
-
-
-    colliders = nx.dag.colliders(DAG)
-
-    graphs = []
     for collider in colliders:
         g = nx.DiGraph()
         g.add_edges_from([(collider[0], collider[1]), (collider[2], collider[1])])
-        graphs.append(g)
+        collider_graphs.append(g)
+    
+    return collider_graphs
 
 
-    graphs.append(DAG)
+def find_forks(test_DAG):
 
-    fig, axes = plt.subplots(1, len(graphs), figsize=(12, 4))
+    print(test_DAG.edges)
+# --------------------------------------WORK IN PROGRESS--------------------------------------
+    
 
-    for i, (G, ax) in enumerate(zip(graphs, axes)):
-        pos = nx.spring_layout(G, seed=42)
+
+
+
+
+
+
+
+
+
+def has_cycle(G):
+    try:
+        list(nx.find_cycle(G, orientation='original'))
+        return True
+    except nx.exception.NetworkXNoCycle:
+        return False
+
+
+def create_DAG(nodes):
+    """
+    check the cycle
+
+    1. choose a random number of edge
+    2. choose two random nodes for starting and ending node
+    3. add first with those nodes (bigger node, smaller node)
+    4. check if there is a cycle -> if there is, remove the latest added edge
+    5. return the graph
+    """
+    random_edges = random.randint(nodes - 1, (nodes * (nodes - 1)) // 2)
+    G = nx.DiGraph()
+
+    while G.number_of_edges() < random_edges:
+        u, v = random.sample(range(1, nodes + 1), 2)
+        big = max(u, v)
+        small = min(u, v)
+
+        G.add_edge(big, small)
+        if has_cycle(G):
+            G.remove_edge(big, small)
+    
+    print(G.number_of_edges())
+    return G
+
+
+def create_DAG_alternative_ver(n):
+    """
+    1. create every node
+    2. create every possible edge with using the logic (larger -> smaller)
+    3. choose a random number of edge
+    4. choose possible random edges from step 2 with using a random number from step 3
+    5. add every node and edge
+    6. return the graph
+
+    This is more efficient because since our possible edge lists includes NEVER create a cycle
+    we don't have to check if there is a cycle in our current graph every time.
+    """
+
+    nodes = list(range(n, 0, -1))
+
+    able_edges = [] # every possible edge
+    for i in range(n):
+        for j in range(i + 1, n):
+            able_edges.append((nodes[i], nodes[j]))
+    
+    min_edges = n - 1
+    max_edges = len(able_edges) 
+    num_edges = random.randint(min_edges, max_edges)
+    edges = random.sample(able_edges, num_edges)
+
+    G = nx.DiGraph()
+    G.add_nodes_from(nodes)
+    G.add_edges_from(edges)
+
+    print(G.number_of_edges())
+    return G
+
+
+def measure_time(f, n):
+    start = time.time()
+    f(n)
+    end = time.time()
+
+    return end - start
+
+
+def main():
+
+    start1 = time.time()
+    cycle_check_DAG = create_DAG(15)
+    end1 = time.time()
+
+    print(f"Time taken (create_DAG): {end1 - start1:.6f} seconds")
+    print(f"IS DAG?: {nx.is_directed_acyclic_graph(cycle_check_DAG)}")
+
+
+    start2 = time.time()
+    DAG = create_DAG_alternative_ver(15)
+    end2 = time.time()
+
+    print(f"Time taken (create_DAG_alternative_ver): {end2 - start2:.6f} seconds")
+    print(f"IS DAG?: {nx.is_directed_acyclic_graph(DAG)}")
+
+
+    DAGS = [cycle_check_DAG, DAG]
+
+
+    fig, axes = plt.subplots(1, len(DAGS), figsize=(12, 4))
+
+    for i, (G, ax) in enumerate(zip(DAGS, axes)):
+        pos = nx.spring_layout(DAG, k=0.8, iterations=20)
         nx.draw(G, pos, with_labels=True, ax=ax, arrows=True, node_color="lightblue")
-        if i == len(graphs) - 1:
-            ax.set_title(f"DAG")
-        else:
-            ax.set_title(f"Collider {i+1}")
 
     plt.tight_layout()
     plt.show()
