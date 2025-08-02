@@ -2,6 +2,7 @@ import networkx as nx
 import matplotlib.pyplot as plt
 import random
 import time
+from dag_generator import DAG_Generator
 
 
 
@@ -37,8 +38,6 @@ def find_forks(test_DAG):
 
 
 
-
-
 def has_cycle(G):
     try:
         list(nx.find_cycle(G, orientation='original'))
@@ -47,7 +46,7 @@ def has_cycle(G):
         return False
 
 
-def create_DAG(nodes):
+def create_DAG(n):
     """
     check the cycle
 
@@ -57,20 +56,33 @@ def create_DAG(nodes):
     4. check if there is a cycle -> if there is, remove the latest added edge
     5. return the graph
     """
-    random_edges = random.randint(nodes - 1, (nodes * (nodes - 1)) // 2)
+    min_edges = n - 1
+    max_edges = (n * (n - 1)) // 2
+
+    random_edges = random.randint(min_edges, max_edges)
     G = nx.DiGraph()
 
     while G.number_of_edges() < random_edges:
-        u, v = random.sample(range(1, nodes + 1), 2)
+        u, v = random.sample(range(1, n + 1), 2)
         big = max(u, v)
         small = min(u, v)
 
         G.add_edge(big, small)
-        if has_cycle(G):
+
+        if not nx.is_directed_acyclic_graph(G):
             G.remove_edge(big, small)
     
     print(G.number_of_edges())
     return G
+
+
+
+
+
+
+
+
+
 
 
 def create_DAG_alternative_ver(n):
@@ -116,33 +128,36 @@ def measure_time(f, n):
 
 def main():
 
-    start1 = time.time()
-    cycle_check_DAG = create_DAG(15)
-    end1 = time.time()
-
-    print(f"Time taken (create_DAG): {end1 - start1:.6f} seconds")
-    print(f"IS DAG?: {nx.is_directed_acyclic_graph(cycle_check_DAG)}")
+    dag_generator = DAG_Generator(10)
 
 
-    start2 = time.time()
-    DAG = create_DAG_alternative_ver(15)
-    end2 = time.time()
+    DAG = dag_generator.generate_random_dag()
+    print(nx.is_directed_acyclic_graph(DAG))
 
-    print(f"Time taken (create_DAG_alternative_ver): {end2 - start2:.6f} seconds")
-    print(f"IS DAG?: {nx.is_directed_acyclic_graph(DAG)}")
-
-
-    DAGS = [cycle_check_DAG, DAG]
-
-
-    fig, axes = plt.subplots(1, len(DAGS), figsize=(12, 4))
-
-    for i, (G, ax) in enumerate(zip(DAGS, axes)):
-        pos = nx.spring_layout(DAG, k=0.8, iterations=20)
-        nx.draw(G, pos, with_labels=True, ax=ax, arrows=True, node_color="lightblue")
-
-    plt.tight_layout()
+    pos = nx.spring_layout(DAG, k=0.8, iterations=20)
+    nx.draw(DAG, pos, with_labels=True, arrows=True, node_color="lightblue")
     plt.show()
+
+    
+
+
+
+
+    # DAG = create_DAG_alternative_ver(15)
+
+
+
+    # DAGS = [cycle_check_DAG, DAG]
+
+
+    # fig, axes = plt.subplots(1, len(DAGS), figsize=(12, 4))
+
+    # for i, (G, ax) in enumerate(zip(DAGS, axes)):
+    #     pos = nx.spring_layout(DAG, k=0.8, iterations=20)
+    #     nx.draw(G, pos, with_labels=True, ax=ax, arrows=True, node_color="lightblue")
+
+    # plt.tight_layout()
+    # plt.show()
 
 if __name__ == "__main__":
     main()
