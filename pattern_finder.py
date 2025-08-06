@@ -1,10 +1,6 @@
 import networkx as nx
 
 class PatternFinder:
-
-    def __init__(self):
-        pass
-
     
     def three_node_colliders(self, DAG):
 
