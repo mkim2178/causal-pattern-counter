@@ -10,26 +10,23 @@ VALID_ORDERS = ["DESC", "ASC"]
 
 class DagGenerator:
 
-    def __init__(self):
-        pass
-
 
     def handle_invalid_node_number(self, node_number):
 
         if not isinstance(node_number, int) or isinstance(node_number, bool):
-            raise InvalidInputException("INVALID TYPE: SHOULD BE AN INTEGER")
+            raise InvalidInputException("Invalid type: should be an integer")
 
         if not (MIN_NODE <= node_number <= MAX_NODE):
-            raise InvalidInputException(f"INVALID RANGE: SHOULD BE BETWEEN {MIN_NODE} ~ {MAX_NODE}")
+            raise InvalidInputException(f"Invalid range: should be between {MIN_NODE} ~ {MAX_NODE}")
         
 
     def handle_invalid_order(self, order):
         
         if not isinstance(order, str) or isinstance(order, bool):
-            raise InvalidInputException("INVALID TYPE: SHOULD BE A STRING")
+            raise InvalidInputException("Invalid type: should be a string")
 
         if order not in VALID_ORDERS:
-            raise InvalidInputException(f"INVALID STRING: SHOULD BE ONE OF: {VALID_ORDERS}")
+            raise InvalidInputException(f"Invalid string: should be on of {VALID_ORDERS}")
 
     
     def generate_connected_random_dag(self, node_number):
