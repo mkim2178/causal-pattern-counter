@@ -5,23 +5,7 @@ import time
 import math
 from dag_generator import DagGenerator
 from pattern_finder import PatternFinder
-
-
-
-
-# --------------------------------------WORK IN PROGRESS--------------------------------------
-
-
-
-def find_forks(test_DAG):
-
-    print(test_DAG.edges)
-# --------------------------------------WORK IN PROGRESS--------------------------------------
-    
-
-
-
-
+from graph_visualizer import GraphVisualizer
 
 
 
@@ -30,24 +14,32 @@ def main():
 
     dag_generator = DagGenerator()
     pattern_finder = PatternFinder()
+    graph_visualizer = GraphVisualizer()
+
+    DAG = dag_generator.generate_connected_random_dag(5)
+    colliders = pattern_finder.three_node_colliders(DAG)
+    forks = pattern_finder.three_node_forks(DAG)
+
+    graph_visualizer.visualize_single_graph(DAG, "DAG", "lightblue")
+    graph_visualizer.visualize_multiple_graphs(colliders, "Collider", "lightgray")
+    graph_visualizer.visualize_multiple_graphs(forks, "Fork", "lightgreen")
 
 
+    # for i in range(10):
+    #     same = {}
+    #     for j in range(3, 27):
+    #         DAG = dag_generator.generate_connected_random_dag(j)
+    #         colliders = pattern_finder.three_node_colliders(DAG)
+    #         forks = pattern_finder.three_node_forks(DAG)
 
-    for i in range(10):
-        same = {}
-        for j in range(3, 27):
-            DAG = dag_generator.generate_connected_random_dag(j)
-            colliders = pattern_finder.three_node_colliders(DAG)
-            forks = pattern_finder.three_node_forks(DAG)
-
-            if len(colliders) == len(forks):
-                same[j] = "SAME"
-            else:
-                same[j] = "DIFFERENT"
+    #         if len(colliders) == len(forks):
+    #             same[j] = "SAME"
+    #         else:
+    #             same[j] = "DIFFERENT"
             
-        print(f"SIMULATION {i}:")
-        print(same)
-        print()
+    #     print(f"SIMULATION {i}:")
+    #     print(same)
+    #     print()
 
 
 
