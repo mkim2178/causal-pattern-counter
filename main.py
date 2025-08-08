@@ -6,6 +6,7 @@ import math
 from dag_generator import DagGenerator
 from pattern_finder import PatternFinder
 from graph_visualizer import GraphVisualizer
+from independency_finder import IndependencyFinder
 
 
 
@@ -15,62 +16,37 @@ def main():
     dag_generator = DagGenerator()
     pattern_finder = PatternFinder()
     graph_visualizer = GraphVisualizer()
-
-    adj_counter = 0
-
+    independency_finder = IndependencyFinder()
 
 
-    DAG = dag_generator.generate_connected_random_dag(26)
-    is_adj = True
+    DAG = dag_generator.generate_connected_random_dag(10)
+    print(DAG.number_of_edges())
 
-    source = target = None
+    colliders = pattern_finder.three_node_colliders(DAG)
 
-    attepts = 0
-    while is_adj:
-
-        source, target = random.sample(list(DAG.nodes), 2)
-        attepts += 1
-
-        if not DAG.has_edge(source, target) and not DAG.has_edge(target, source):
-            is_adj = False
+    source, target = independency_finder.select_random_source_and_target(DAG)
+    print(nx.find_minimal_d_separator(DAG, source, target))
 
     print(source, target)
-    print(f"ATTEMPTS EXECUTED: {attepts}")
+    # print(paths)
 
-    for node in [source, target]:
-        child_nodes = list(nx.descendants_at_distance(DAG, node, 1))
-        print(f"child node of {node}: {child_nodes}")
+    # print("COLLIDERS")
+    # for collider in pattern_finder.three_node_colliders(DAG):
+    #     print(list(collider.edges))
 
+    # print()
 
-    # all_paths = nx.all_simple_paths(DAG.to_undirected(), source, target)
-
-    # for path in all_paths:
-    #     print(path)
-
-    graph_visualizer.visualize_single_graph(DAG, "DAG", "lightblue")
-
-
-
-        # print(f"two random nodes: {random_two_nodes}")
-
-        # for node in random_two_nodes:
-        #     print(f"STARTING NODE: {node}")
-        #     child_nodes = list(nx.descendants_at_distance(DAG, node, 1))
-        #     print(child_nodes)
+    # print("FORKS")
+    # for fork in pattern_finder.three_node_forks(DAG):
+    #     print(list(fork.edges))
+    graph_visualizer.visualize_single_graph(DAG, "DAG", "lightblue", "matplotlib")
+    graph_visualizer.visualize_single_graph(DAG, "DAG", "lightblue", "pyvis")
+    graph_visualizer.visualize_multiple_graphs(colliders, "Colliders", "lightgreen")
 
 
-        # all_paths = nx.all_simple_paths(DAG.to_undirected(), source, target)
-    
-        # for path in list(all_paths):
-        #     if len(path) == 2:
-        #         # print("they are adjacent")
-        #         adj_counter += 1
-        #         break
-        #     # print(path)
-    # print(adj_counter)
-    # graph_visualizer.visualize_single_graph(DAG, "DAG", "lightblue")
 
-    
+
+
 
 
 
