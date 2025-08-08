@@ -18,7 +18,7 @@ class IndependencyFinder:
             source, target = random.sample(list(DAG.nodes), 2)
             if not DAG.has_edge(source, target) and not DAG.has_edge(target, source):
                 is_adjacent = False
-        
+
         return source, target
 
 
