@@ -1,19 +1,41 @@
 import networkx as nx
 import matplotlib.pyplot as plt
 import random
+from pyvis.network import Network
 from exceptions import MissingGraphException
 
 
 class GraphVisualizer:
 
-    def visualize_single_graph(self, graph, graph_title, node_color):
+    def visualize_single_graph(self, graph, graph_title, node_color, with_using):
 
         if not graph:
             raise MissingGraphException(f"{graph_title} does not exist")
 
-        nx.draw(graph, with_labels=True, node_color=node_color)
-        plt.title(graph_title)
-        plt.show()
+        print(type(graph))
+
+
+        if with_using == "matplotlib":
+
+            nx.draw(graph, with_labels=True, node_color=node_color)
+            plt.title(graph_title)
+            plt.show()
+        
+        else:
+
+            pos = nx.spring_layout(graph, seed=42)
+            net = Network(notebook=False, directed=True)
+            net.from_nx(graph)
+            scale = graph.number_of_nodes() * 100
+            
+            for node, (x, y) in pos.items():
+                pyvis_node = net.get_node(node)
+                pyvis_node['x'] = x * scale
+                pyvis_node['y'] = y * scale
+                pyvis_node['fixed'] = True
+        
+            net.toggle_physics(False)
+            net.show("DAG.html")
     
 
     def visualize_multiple_graphs(self, graphs, graph_title, node_color):
@@ -30,7 +52,11 @@ class GraphVisualizer:
             raise MissingGraphException(f"{graph_title} does not exist")
         
         elif len(graphs) == 1:
-            self.visualize_single_graph(graphs[0], graph_title, node_color)
+
+            nx.draw(graphs[0], with_labels=True, node_color=node_color)
+            plt.title(graph_title)
+            plt.show()
+            # self.visualize_single_graph(graphs[0], graph_title, node_color)
 
         else:
 
