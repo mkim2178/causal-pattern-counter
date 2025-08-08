@@ -16,13 +16,70 @@ def main():
     pattern_finder = PatternFinder()
     graph_visualizer = GraphVisualizer()
 
-    DAG = dag_generator.generate_connected_random_dag(5)
-    colliders = pattern_finder.three_node_colliders(DAG)
-    forks = pattern_finder.three_node_forks(DAG)
+    adj_counter = 0
+
+
+
+    DAG = dag_generator.generate_connected_random_dag(26)
+    is_adj = True
+
+    source = target = None
+
+    attepts = 0
+    while is_adj:
+
+        source, target = random.sample(list(DAG.nodes), 2)
+        attepts += 1
+
+        if not DAG.has_edge(source, target) and not DAG.has_edge(target, source):
+            is_adj = False
+
+    print(source, target)
+    print(f"ATTEMPTS EXECUTED: {attepts}")
+
+    for node in [source, target]:
+        child_nodes = list(nx.descendants_at_distance(DAG, node, 1))
+        print(f"child node of {node}: {child_nodes}")
+
+
+    # all_paths = nx.all_simple_paths(DAG.to_undirected(), source, target)
+
+    # for path in all_paths:
+    #     print(path)
 
     graph_visualizer.visualize_single_graph(DAG, "DAG", "lightblue")
-    graph_visualizer.visualize_multiple_graphs(colliders, "Collider", "lightgray")
-    graph_visualizer.visualize_multiple_graphs(forks, "Fork", "lightgreen")
+
+
+
+        # print(f"two random nodes: {random_two_nodes}")
+
+        # for node in random_two_nodes:
+        #     print(f"STARTING NODE: {node}")
+        #     child_nodes = list(nx.descendants_at_distance(DAG, node, 1))
+        #     print(child_nodes)
+
+
+        # all_paths = nx.all_simple_paths(DAG.to_undirected(), source, target)
+    
+        # for path in list(all_paths):
+        #     if len(path) == 2:
+        #         # print("they are adjacent")
+        #         adj_counter += 1
+        #         break
+        #     # print(path)
+    # print(adj_counter)
+    # graph_visualizer.visualize_single_graph(DAG, "DAG", "lightblue")
+
+    
+
+
+
+    # colliders = pattern_finder.three_node_colliders(DAG)
+    # forks = pattern_finder.three_node_forks(DAG)
+
+    # graph_visualizer.visualize_single_graph(DAG, "DAG", "lightblue")
+    # graph_visualizer.visualize_multiple_graphs(colliders, "Collider", "lightgray")
+    # graph_visualizer.visualize_multiple_graphs(forks, "Fork", "lightgreen")
 
 
     # for i in range(10):
