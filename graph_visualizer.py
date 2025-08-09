@@ -1,44 +1,45 @@
 import networkx as nx
-import matplotlib.pyplot as plt
 import random
+import os
+import webbrowser
 from pyvis.network import Network
 from exceptions import MissingGraphException
 
 
 class GraphVisualizer:
 
-    def visualize_single_graph(self, graph, graph_title, node_color, with_using):
+    def visualize_single_graph(self, graph):
 
         if not graph:
-            raise MissingGraphException(f"{graph_title} does not exist")
+            raise MissingGraphException(f"graph does not exist")
 
-        print(type(graph))
+        net = Network(width='100vw', height='100vh', notebook=False, directed=True)
+        net.from_nx(graph)
+        scale = graph.number_of_nodes() * 100
 
-
-        if with_using == "matplotlib":
-
-            nx.draw(graph, with_labels=True, node_color=node_color)
-            plt.title(graph_title)
-            plt.show()
-        
-        else:
-
-            pos = nx.spring_layout(graph, seed=42)
-            net = Network(notebook=False, directed=True)
-            net.from_nx(graph)
-            scale = graph.number_of_nodes() * 100
+        pos = nx.spring_layout(graph, seed=42)
             
-            for node, (x, y) in pos.items():
-                pyvis_node = net.get_node(node)
-                pyvis_node['x'] = x * scale
-                pyvis_node['y'] = y * scale
-                pyvis_node['fixed'] = True
+        for node, (x, y) in pos.items():
+            pyvis_node = net.get_node(node)
+            pyvis_node['x'] = x * scale
+            pyvis_node['y'] = y * scale
+            pyvis_node['fixed'] = True
         
-            net.toggle_physics(False)
-            net.show("DAG.html")
+        net.toggle_physics(False)
+        html_file = "graph.html"
+        net.show(html_file)
+
+        full_path = os.path.abspath(html_file)
+        webbrowser.open(f"file://{full_path}")
+
     
 
-    def visualize_multiple_graphs(self, graphs, graph_title, node_color):
+    def rename_graph_nodes(self, G, prefix):
+        mapping = {node: f"{prefix}_{node}" for node in G.nodes()}
+        return nx.relabel_nodes(G, mapping)
+
+
+    def visualize_multiple_graphs(self, graphs, graph_title):
         """
         A function that visualizes multiple sub graphs
 
@@ -47,27 +48,33 @@ class GraphVisualizer:
         3. Otherwise, select two random graphs and visualize both of them side-by-side.
         """
 
-
         if len(graphs) == 0:
             raise MissingGraphException(f"{graph_title} does not exist")
         
-        elif len(graphs) == 1:
-
-            nx.draw(graphs[0], with_labels=True, node_color=node_color)
-            plt.title(graph_title)
-            plt.show()
-            # self.visualize_single_graph(graphs[0], graph_title, node_color)
-
+        random_graphs = None
+        
+        if len(graphs) == 1:
+            random_graphs = graphs
         else:
+            random_graphs = random.sample(graphs, 2)
 
-            two_random_graphs = random.sample(graphs, 2)
+        net = Network(width='100vw', height='100vh', notebook=False, directed=True)
+        renamed_graphs = [self.rename_graph_nodes(G, f"{graph_title[:4]}{i+1}") for i, G in enumerate(random_graphs)]
+        combined = nx.compose_all(renamed_graphs)
+        net.from_nx(combined)
 
-            fig, axes = plt.subplots(nrows=1, ncols=2, figsize=(12, 4))
-            for i, (G, ax) in enumerate(zip(two_random_graphs, axes)):
-                pos = nx.spring_layout(G, k=0.8, iterations=20, seed=10)
-                nx.draw(G, pos, with_labels=True, ax=ax, arrows=True, node_color=node_color)
-                ax.set_title(f"Random {graph_title} {i + 1}")
+        scale = 300
+        pos = nx.spring_layout(combined, seed=42)
 
-            plt.subplots_adjust(wspace=0.5)
-            plt.tight_layout()
-            plt.show()
+        for node, (x, y) in pos.items():
+            pyvis_node = net.get_node(node)
+            pyvis_node['x'] = x * scale
+            pyvis_node['y'] = y * scale
+            pyvis_node['fixed'] = True
+
+        net.toggle_physics(False)
+        html_file = "merged_graph.html"
+        net.show(html_file)
+
+        full_path = os.path.abspath(html_file)
+        webbrowser.open(f"file://{full_path}")
