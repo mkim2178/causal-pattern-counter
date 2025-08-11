@@ -1,7 +1,52 @@
 import networkx as nx
+from itertools import combinations
 
 class PatternFinder:
+
+
+    def find_all_colliders(self, DAG):
+        """
+        find all colliders
+        """
+
+        return set(nx.dag.colliders(DAG))
     
+    def find_all_forks(self, DAG):
+        """
+        find all forks
+        """
+
+        forks = set()
+        for node in DAG.nodes:
+            for p1, p2 in combinations(DAG.successors(node), 2):
+                fork = (p1, node, p2)
+                forks.add(fork)
+        return forks
+    
+    def find_all_chains(self, DAG):
+        """
+        find all chains
+        """
+
+        chains = set()
+
+        pass
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     def three_node_colliders(self, DAG):
 
         colliders = list(nx.dag.colliders(DAG))
