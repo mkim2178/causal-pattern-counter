@@ -26,7 +26,7 @@ class DagGenerator:
             raise InvalidInputException("Invalid type: should be a string")
 
         if order not in VALID_ORDERS:
-            raise InvalidInputException(f"Invalid string: should be on of {VALID_ORDERS}")
+            raise InvalidInputException(f"Invalid string: should be one of {" and ".join(VALID_ORDERS)}")
 
     
     def generate_connected_random_dag(self, node_number):
