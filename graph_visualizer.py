@@ -39,6 +39,9 @@ class GraphVisualizer:
         return nx.relabel_nodes(G, mapping)
 
 
+
+
+
     def visualize_multiple_graphs(self, graphs, graph_title):
         """
         A function that visualizes multiple sub graphs
@@ -51,15 +54,19 @@ class GraphVisualizer:
         if len(graphs) == 0:
             raise MissingGraphException(f"{graph_title} does not exist")
         
-        random_graphs = None
-        
-        if len(graphs) == 1:
-            random_graphs = graphs
-        else:
-            random_graphs = random.sample(graphs, 2)
+
+        if len(graphs) >= 2:
+            graphs = random.sample(graphs, 2)
 
         net = Network(width='100vw', height='100vh', notebook=False, directed=True)
-        renamed_graphs = [self.rename_graph_nodes(G, f"{graph_title[:4]}{i+1}") for i, G in enumerate(random_graphs)]
+
+        renamed_graphs = []
+
+        for i, G in enumerate(graphs):
+            new_node_name = f"{graph_title[:4]}_{i + 1}"
+            self.rename_graph_nodes(G, new_node_name)
+
+        renamed_graphs = [self.rename_graph_nodes(G, f"{graph_title[:4]}{i+1}") for i, G in enumerate(graphs)]
         combined = nx.compose_all(renamed_graphs)
         net.from_nx(combined)
 
