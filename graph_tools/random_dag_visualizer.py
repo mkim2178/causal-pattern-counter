@@ -16,13 +16,15 @@ LAYOUT = {"spring": nx.spring_layout,
 class RandomDagVisualizer:
     def __init__(self, graph, layout):
         self.graph = graph
-        self.pos = LAYOUT[layout][self.graph]
+        self.pos = LAYOUT[layout](self.graph)
 
 
     def customize_edges(self):
 
         edge_x = []
         edge_y = []
+
+        edge_annotations = []
 
 
         for u, v in self.graph.edges():
@@ -31,15 +33,35 @@ class RandomDagVisualizer:
             edge_x += [ux, vx, None]
             edge_y += [uy, vy, None]
 
+            edge_annotations.append(
+                dict(
+                    ax=ux,
+                    ay=uy,
+                    x=vx,
+                    y=vy,
+                    xref="x",
+                    yref="y",
+                    axref="x",
+                    ayref="y",
+                    showarrow=True,
+                    arrowhead=3,
+                    arrowsize=1,
+                    arrowwidth=2,
+                    arrowcolor="#812CCF",
+                )
+            )
+
+
+
         edge_trace = go.Scatter(
             x=edge_x,
             y=edge_y,
-            line=dict(width=1, color='skyblue'),
+            line=dict(width=2, color="#812CCF"),
             hoverinfo='none',
             mode='lines'
         )
 
-        return edge_trace
+        return edge_trace, edge_annotations
     
 
     def customize_nodes(self):
@@ -56,15 +78,16 @@ class RandomDagVisualizer:
             x=node_x,
             y=node_y,
             mode='markers+text',
-            hoverinfo='none',
+            text=[str(node) for node in self.graph.nodes()],
+            hoverinfo='text',
             marker=dict(
                 size=30,
-                color='green',
-                line=dict(width=2, color='gray')
+                color="#44B34F",
+                line=dict(width=2, color='#977f7f')
             ),
             textfont=dict(
-                size=17,
-                color="white"
+                size=20,
+                color="#FFFFFF"
             )
         )
 
@@ -73,7 +96,7 @@ class RandomDagVisualizer:
 
     def visualize(self):
 
-        edge_trace = self.customize_edges()
+        edge_trace, edge_annotations = self.customize_edges()
         node_trace = self.customize_nodes()
 
         fig = go.Figure(data=[edge_trace, node_trace],
@@ -82,7 +105,8 @@ class RandomDagVisualizer:
                             hovermode='closest',
                             margin=dict(l=0,r=0,t=0,b=0),
                             xaxis=dict(showgrid=False, zeroline=False, showticklabels=False),
-                            yaxis=dict(showgrid=False, zeroline=False, showticklabels=False)
+                            yaxis=dict(showgrid=False, zeroline=False, showticklabels=False),
+                            annotations=edge_annotations
                             )
                         )
         
@@ -90,3 +114,10 @@ class RandomDagVisualizer:
             autosize=True,
             margin=dict(l=0,r=0,t=0,b=0)
         )
+
+        return fig
+
+
+    def visualize_with_pyplot(self):
+
+        nx.draw(self.graph, self.pos, with_labels=True, arrows=True, node_color='skyblue')
