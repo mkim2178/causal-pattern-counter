@@ -1,1 +1,2 @@
 from .random_dag_generator import RandomDagGenerator
+from .random_dag_visualizer import RandomDagVisualizer
