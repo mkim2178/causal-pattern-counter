@@ -5,7 +5,7 @@ import string
 ALPHABETS = set(string.ascii_uppercase)
 MIN_NODE = 3
 MAX_NODE = 26
-VALID_ORDERS = {"desc", "asc"}
+VALID_ORDERS = {"descending", "ascending"}
 
 
 class RandomDagGenerator:
@@ -57,7 +57,7 @@ class RandomDagGenerator:
         numerical_nodes = [i for i in range(self.node, 0, -1)]
         possible_edges = []
 
-        if self.order == "asc":
+        if self.order == "ascending":
             numerical_nodes = [i for i in range(1, self.node + 1)]
 
         # guarantee a connected graph
